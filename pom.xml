@@ -11,10 +11,13 @@
   <artifactId>iar-extension</artifactId>
   <version>1.0-SNAPSHOT</version>
   <dependencies>
-  	<dependency>
-  		<groupId>org.ow2.mind</groupId>
-  		<artifactId>mindc</artifactId>
-  		<version>1.0-SNAPSHOT</version>
-  	</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-frontend</artifactId>
+        </dependency>
+                <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-backend</artifactId>
+        </dependency>
   </dependencies>
 </project>
