@@ -195,7 +195,7 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 				//				cmd.add(outputFile.getPath());
 
 				// ->
-				cmd.add("-dependencies=m");
+				cmd.add("--dependencies=m");
 				cmd.add(dependencyOutputFile.getPath());
 			}
 
