@@ -67,52 +67,32 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 			super(context);
 		}
 
-		// -g -> --debug
 		public PreprocessorCommand addDebugFlag() {
 			flags.add("--debug");
 			return this;
 		}
 
-		// inherited addDefine() -> remains untouched,
-		//-D exists in IAR
 
-		// Check if --preinclude in IAR is equal to -include in GCC
-		public PreprocessorCommand addIncludeFile(final File includeFile) {
-			flags.add("--preinclude");
-			flags.add(includeFile.getPath());
-			return this;
-		}
-
-		// inherited readDependencies() -> remains untouched
-		// we will try to just modify what we feed it
-
-
-		// 
-		public boolean exec() throws ADLException, InterruptedException {
+	public boolean exec() throws ADLException, InterruptedException {
 			final List<String> cmd = new ArrayList<String>();
 			cmd.add(this.cmd);
 
 			cmd.addAll(flags);
 
-			// Not compatible with IAR option --preprocess
-			//			if (dependencyOutputFile != null) {
-			//				// Found no equivalent : check again
-			//				//				cmd.add("-MMD");
-			//				//				cmd.add("-MF");
-			//				//				cmd.add(dependencyOutputFile.getPath());
-			//				//				cmd.add("-MT");
-			//				//				cmd.add(outputFile.getPath());
-			//
-			//				// ->
-			//				cmd.add("-dependencies=m");
-			//				cmd.add(dependencyOutputFile.getPath());
-			//			}
+		      for (final String def : defines) {
+		        cmd.add("-D" + def);
+		      }
+		      for (final File incDir : includeDir) {
+		        cmd.add("-I" + incDir.getPath().trim());
+		      }
 
-			// preprocess added after all flags because --preprocess
-			// didn't like -I after, suggested ---I but we minimize changes
-			// -E -> --preprocess
-			// n : preprocess only
-			// l : add #lines
+		      for (final File incFile : includeFile) {
+		        cmd.add("--preinclude");
+		        cmd.add(incFile.getPath());
+		      }
+		    cmd.add("--dependencies=m");
+		    cmd.add(dependencyOutputFile.getPath());
+		    
 			cmd.add("--preprocess=nl"); // already specifies output so we don't need -o
 			//cmd.add("-o");
 			cmd.add(outputFile.getPath());
@@ -161,18 +141,6 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 			return this;
 		}
 
-		// addDefine -> remains untouched
-		// addIncludeDir -> remains untouched
-
-		// -include -> --preinclude (check if it's ok)
-		public CompilerCommand addIncludeFile(final File includeFile) {
-			flags.add("--preinclude");
-			flags.add(includeFile.getPath());
-			return this;
-		}
-
-		// readDependencies -> remains untouched
-
 		public boolean exec() throws ADLException, InterruptedException {
 
 			final List<String> cmd = new ArrayList<String>();
@@ -184,21 +152,17 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 			//cmd.add("-c");
 
 			cmd.addAll(flags);
+		      for (final String def : defines) {
+			        cmd.add("-D" + def);
+			      }
+			      for (final File incDir : includeDir) {
+			        cmd.add("-I" + incDir.getPath().trim());
+			      }
 
-			// TODO : Experimental... MAYBE REMOVE !
-			if (dependencyOutputFile != null) {
-				// Found no equivalent : check again
-				//				cmd.add("-MMD");
-				//				cmd.add("-MF");
-				//				cmd.add(dependencyOutputFile.getPath());
-				//				cmd.add("-MT");
-				//				cmd.add(outputFile.getPath());
-
-				// ->
-				cmd.add("--dependencies=m");
-				cmd.add(dependencyOutputFile.getPath());
-			}
-
+			      for (final File incFile : includeFile) {
+			        cmd.add("--preinclude");
+			        cmd.add(incFile.getPath());
+			      }
 			cmd.add("-o");
 			cmd.add(outputFile.getPath());
 
