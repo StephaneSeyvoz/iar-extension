@@ -42,14 +42,14 @@ echo "        $EXEC build_iar"
 echo ""
 }
 
-if [ $# -ne 2 ]
+if [ $# -ne 1 ]
 then 
 	usage
 	exit
 fi
 
 BUILD_DIR=$1
-for DEP_FILE in $(find $BUILD_DIR)
+for DEP_FILE in $(find $BUILD_DIR -name *.d)
 do
 	make --quiet -f $DEP_FILE
 	if [ $? -ne 0 ]
