@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# This file is a stub  for the real IAR "ilinkarm.exe" installed with wine.
+# Put this on your path to launch the linker with the "ilinkarm" command.
+
+#Example :
+#$HOME/.wine/drive_c/Program\ Files\ \(x86\)/IAR\ Systems/Embedded\ Workbench\ 6.0/arm/bin/ilinkarm.exe $*
+#C:\Program Files\IAR Systems\Embedded Workbench 6.0\arm\bin\ilinkarm.exe $*
+
+#remove or comment the following once the file is properly edited
+echo "Please edit the file $( cd $(dirname $0) ; pwd -P )/$(basename $0)"

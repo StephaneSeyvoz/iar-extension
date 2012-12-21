@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#This script is needed to take profit of the 
+#mindc incremental build with IAR toolchain.
+#
+#Explanation :
+#IAR produces buggy dependency files, with un-escaped
+#spaces in file paths. Neither *make* nor *mind* can 
+#deal with such files. 
+#
+#If none of your absolute source path contains spaces,
+#running this script is unnecessary. (IAR installation 
+#folders are also considered as source path, and usually 
+#at 'C:\Program Files\IAR embedded workbench\...' which 
+#obviously installed contains spaces.)
+#
+#Running this script takes a long time. You should consider
+#reinstalling IAR at a 'space free' location.
+#
+#Running this script is also unnecessary if you don't use
+#incremental compilation. (By specifying '-F' on the 'mind'
+#command line.)
+
+EXEC=$(basename $0)
+
+usage() {
+echo "$EXEC : remove buggy dependency files created by IAR compiler"
+echo ""
+echo "USAGE : $EXEC BUILD_DIRECTORY"
+echo "        where BUILD_DIRECTORY is the folder containing IAR compiled files"
+echo ""
+echo "Example makefile :"
+echo ""
+echo "all: build_iar cleanDepFiles"
+echo "        mindc --iar -o build_iar ....."
+echo ""
+echo "build_iar:"
+echo "        mkdir -f build_iar"
+echo ""
+echo "cleanDepFiles: build_iar"
+echo "        $EXEC build_iar"
+echo ""
+}
+
+if [ $# -ne 2 ]
+then 
+	usage
+	exit
+fi
+
+BUILD_DIR=$1
+for DEP_FILE in $(find $BUILD_DIR)
+do
+	make --quiet -f $DEP_FILE
+	if [ $? -ne 0 ]
+	then
+		rm $DEP_FILE
+	fi
+done
