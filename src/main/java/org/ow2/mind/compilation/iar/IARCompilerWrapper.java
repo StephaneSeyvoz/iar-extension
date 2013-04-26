@@ -54,7 +54,7 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 	public LinkerCommand newLinkerCommand(Map<Object, Object> context) {
 		return new IARLinkerCommand(context);
 	}
-	
+
 	@Override
 	public AssemblerCommand newAssemblerCommand(Map<Object, Object> context) {
 		return new IARAssemblerCommand(context);
@@ -73,31 +73,39 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 		}
 
 
-	public boolean exec() throws ADLException, InterruptedException {
+		public boolean exec() throws ADLException, InterruptedException {
 			final List<String> cmd = new ArrayList<String>();
 			cmd.add(this.cmd);
 
 			cmd.addAll(flags);
 
-		      for (final String def : defines) {
-		        cmd.add("-D" + def);
-		      }
-		      for (final File incDir : includeDir) {
-		        cmd.add("-I" + incDir.getPath().trim());
-		      }
+			for (final String def : defines) {
+				cmd.add("-D" + def);
+			}
+			for (final File incDir : includeDir) {
+				cmd.add("-I" + incDir.getPath().trim());
+			}
 
-		      for (final File incFile : includeFile) {
-		        cmd.add("--preinclude");
-		        cmd.add(incFile.getPath());
-		      }
-		    cmd.add("--dependencies=m");
-		    cmd.add(dependencyOutputFile.getPath());
-		    
+			for (final File incFile : includeFile) {
+				cmd.add("--preinclude");
+				cmd.add(incFile.getPath());
+			}
+			cmd.add("--dependencies=m");
+			cmd.add(dependencyOutputFile.getPath());
+
 			cmd.add("--preprocess=nl"); // already specifies output so we don't need -o
 			//cmd.add("-o");
 			cmd.add(outputFile.getPath());
 
 			cmd.add(inputFile.getPath());
+
+			// save full command for debug and log purposes
+			final StringBuilder sb = new StringBuilder();
+			for (final String str : cmd) {
+				sb.append(str);
+				sb.append(" ");
+			}
+			fullCmd = sb.toString();
 
 			// execute command
 			ExecutionResult result;
@@ -152,21 +160,29 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 			//cmd.add("-c");
 
 			cmd.addAll(flags);
-		      for (final String def : defines) {
-			        cmd.add("-D" + def);
-			      }
-			      for (final File incDir : includeDir) {
-			        cmd.add("-I" + incDir.getPath().trim());
-			      }
+			for (final String def : defines) {
+				cmd.add("-D" + def);
+			}
+			for (final File incDir : includeDir) {
+				cmd.add("-I" + incDir.getPath().trim());
+			}
 
-			      for (final File incFile : includeFile) {
-			        cmd.add("--preinclude");
-			        cmd.add(incFile.getPath());
-			      }
+			for (final File incFile : includeFile) {
+				cmd.add("--preinclude");
+				cmd.add(incFile.getPath());
+			}
 			cmd.add("-o");
 			cmd.add(outputFile.getPath());
 
 			cmd.add(inputFile.getPath());
+
+			// save full command for debug and log purposes
+			final StringBuilder sb = new StringBuilder();
+			for (final String str : cmd) {
+				sb.append(str);
+				sb.append(" ");
+			}
+			fullCmd = sb.toString();
 
 			// execute command
 			ExecutionResult result;
@@ -220,7 +236,7 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 
 			// NOTE SPECIFIC TO IAR : .a files DO NOT EXIST but this lines adds
 			// input files anyway
-			
+
 			// archive files (i.e. '.a' files) are added at the end of the command
 			// line.
 			List<String> archiveFiles = null;
@@ -241,6 +257,14 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 			// Linker scripts do not exist in IAR -> removed -T	        
 
 			cmd.addAll(flags);
+
+			// save full command for debug and log purposes
+			final StringBuilder sb = new StringBuilder();
+			for (final String str : cmd) {
+				sb.append(str);
+				sb.append(" ");
+			}
+			fullCmd = sb.toString();
 
 			// execute command
 			ExecutionResult result;
@@ -274,45 +298,53 @@ public class IARCompilerWrapper extends GccCompilerWrapper {
 		protected IARAssemblerCommand(Map<Object, Object> context) {
 			super(context);
 		}
-		
-	    public AssemblerCommand addDebugFlag() {
-	        flags.add("-r");
-	        return this;
-	      }
-	    
-	    public boolean exec() throws ADLException, InterruptedException {
 
-	        final List<String> cmd = new ArrayList<String>();
-	        cmd.add(this.cmd);
+		public AssemblerCommand addDebugFlag() {
+			flags.add("-r");
+			return this;
+		}
 
-	        cmd.addAll(flags);
+		public boolean exec() throws ADLException, InterruptedException {
 
-	        cmd.add("-o");
-	        cmd.add(outputFile.getPath());
+			final List<String> cmd = new ArrayList<String>();
+			cmd.add(this.cmd);
 
-	        cmd.add(inputFile.getPath());
+			cmd.addAll(flags);
 
-	        // execute command
-	        ExecutionResult result;
-	        try {
-	          result = ExecutionHelper.exec(getDescription(), cmd);
-	        } catch (final IOException e) {
-	          errorManagerItf.logError(CompilerErrors.EXECUTION_ERROR, this.cmd);
-	          return false;
-	        }
+			cmd.add("-o");
+			cmd.add(outputFile.getPath());
 
-	        if (result.getExitValue() != 0) {
-	          errorManagerItf.logError(CompilerErrors.ASSEMBLER_ERROR,
-	              outputFile.getPath(), result.getOutput());
-	          return false;
-	        }
-	        if (result.getOutput() != null) {
-	          // command returns 0 and generates an output (warning)
-	          errorManagerItf.logWarning(CompilerErrors.ASSEMBLER_WARNING,
-	              outputFile.getPath(), result.getOutput());
-	        }
-	        return true;
-	      }
+			cmd.add(inputFile.getPath());
+
+			// save full command for debug and log purposes
+			final StringBuilder sb = new StringBuilder();
+			for (final String str : cmd) {
+				sb.append(str);
+				sb.append(" ");
+			}
+			fullCmd = sb.toString();
+
+			// execute command
+			ExecutionResult result;
+			try {
+				result = ExecutionHelper.exec(getDescription(), cmd);
+			} catch (final IOException e) {
+				errorManagerItf.logError(CompilerErrors.EXECUTION_ERROR, this.cmd);
+				return false;
+			}
+
+			if (result.getExitValue() != 0) {
+				errorManagerItf.logError(CompilerErrors.ASSEMBLER_ERROR,
+						outputFile.getPath(), result.getOutput());
+				return false;
+			}
+			if (result.getOutput() != null) {
+				// command returns 0 and generates an output (warning)
+				errorManagerItf.logWarning(CompilerErrors.ASSEMBLER_WARNING,
+						outputFile.getPath(), result.getOutput());
+			}
+			return true;
+		}
 	}	
 
 }
